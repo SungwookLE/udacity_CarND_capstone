@@ -11,11 +11,13 @@ import numpy as np
 import rospkg
 import math
 
+
 class TLPublisher(object):
     def __init__(self):
         rospy.init_node('tl_publisher')
 
-        self.traffic_light_pubs = rospy.Publisher('/vehicle/traffic_lights', TrafficLightArray, queue_size=1)
+        self.traffic_light_pubs = rospy.Publisher(
+            '/vehicle/traffic_lights', TrafficLightArray, queue_size=1)
 
         light = self.create_light(20.991, 22.837, 1.524, 0.08, 3)
         lights = TrafficLightArray()
@@ -53,7 +55,8 @@ class TLPublisher(object):
         pose.pose.position.y = y
         pose.pose.position.z = z
 
-        q = tf.transformations.quaternion_from_euler(0., 0., math.pi * yaw/180.)
+        q = tf.transformations.quaternion_from_euler(
+            0., 0., math.pi * yaw/180.)
         pose.pose.orientation = Quaternion(*q)
 
         return pose
