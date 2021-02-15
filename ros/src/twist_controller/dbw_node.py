@@ -73,6 +73,8 @@ class DBWNode(object):
 
         self.loop()
 
+        # rospy.spin()
+
     def loop(self):
         rate = rospy.Rate(50)  # 50Hz
         while not rospy.is_shutdown():
