@@ -36,6 +36,7 @@ class DBWNode(object):
     def __init__(self):
         rospy.init_node('dbw_node')
 
+        # get parameter from server, the number (2nd argu) is default value
         vehicle_mass = rospy.get_param('~vehicle_mass', 1736.35)
         fuel_capacity = rospy.get_param('~fuel_capacity', 13.5)
         brake_deadband = rospy.get_param('~brake_deadband', .1)
@@ -72,8 +73,7 @@ class DBWNode(object):
         self.throttle = self.steering = self.brake = 0
 
         self.loop()
-
-        # rospy.spin()
+        rospy.spin()
 
     def loop(self):
         rate = rospy.Rate(50)  # 50Hz
@@ -89,6 +89,7 @@ class DBWNode(object):
             #   self.publish(throttle, brake, steer)
 
             # (2/14) Reference: Lecture Video (walk through)
+            rospy.loginfo("calculating")
             if not None in (self.current_vel, self.linear_vel, self.angular_vel):
                 self.throttle, self.brake, self.steering = self.controller.control(self.current_vel,
                                                                                    self.dbw_enabled,
@@ -103,7 +104,9 @@ class DBWNode(object):
     def dbw_enabled_cb(self, msg):
         self.dbw_enabled = msg
 
+    # i can't understand what linear vel means from 'Waypoint Follower Node'.
     def twist_cb(self, msg):
+        rospy.loginfo("updating_waypoint!")
         self.linear_vel = msg.twist.linear.x
         self.angular_vel = msg.twist.angular.z
 
