@@ -89,7 +89,6 @@ class DBWNode(object):
             #   self.publish(throttle, brake, steer)
 
             # (2/14) Reference: Lecture Video (walk through)
-            rospy.loginfo("calculating")
             if not None in (self.current_vel, self.linear_vel, self.angular_vel):
                 self.throttle, self.brake, self.steering = self.controller.control(self.current_vel,
                                                                                    self.dbw_enabled,
@@ -97,6 +96,7 @@ class DBWNode(object):
                                                                                    self.angular_vel)
 
             if self.dbw_enabled:
+                #rospy.logwarn("angular_vel: {:10f}".format(self.angular_vel))
                 self.publish(self.throttle, self.brake, self.steering)
 
             rate.sleep()
@@ -106,7 +106,6 @@ class DBWNode(object):
 
     # i can't understand what linear vel means from 'Waypoint Follower Node'.
     def twist_cb(self, msg):
-        rospy.loginfo("updating_waypoint!")
         self.linear_vel = msg.twist.linear.x
         self.angular_vel = msg.twist.angular.z
 

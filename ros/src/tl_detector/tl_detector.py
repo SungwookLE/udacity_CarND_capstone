@@ -20,7 +20,7 @@ class TLDetector(object):
         rospy.init_node('tl_detector')
 
         self.pose = None
-        self.waypoints = None
+        #self.waypoints = None
         self.camera_image = None
         self.lights = []
 
@@ -55,14 +55,13 @@ class TLDetector(object):
         self.waypoints_2d = None
         self.waypoint_tree = None
         self.base_waypoints = None
-        rospy.logwarn("tl_detector node construct")
+
         rospy.spin()
 
     def pose_cb(self, msg):
         self.pose = msg
 
     def waypoints_cb(self, waypoints):
-        # TODO: Implement (2/13, first)
         self.base_waypoints = waypoints
         if not self.waypoints_2d:
             self.waypoints_2d = [
@@ -81,9 +80,7 @@ class TLDetector(object):
             msg (Image): image from car-mounted camera
 
         """
-        rospy.logwarn("image_cb callback!")
-
-        return 0
+        rospy.logwarn("tl_dectector: image_cb callback")
 
         self.has_image = True
         self.camera_image = msg
@@ -98,6 +95,7 @@ class TLDetector(object):
         if self.state != state:
             self.state_count = 0
             self.state = state
+            self.upcoming_red_light_pub.publish(Int32(-1))
         elif self.state_count >= STATE_COUNT_THRESHOLD:
             self.last_state = self.state
             light_wp = light_wp if state == TrafficLight.RED else -1
@@ -165,7 +163,7 @@ class TLDetector(object):
             car_wp_idx = self.get_closest_waypoint(
                 self.pose.pose.position.x, self.pose.pose.position.y)
             # TODO find the closest visible traffic light (if one exists)
-            diff = len(self.waypoints.waypoints)
+            diff = len(self.base_waypoints.waypoints)
             for i, light in enumerate(self.lights):
                 # Get stop line waypoint index
                 line = stop_line_positions[i]
@@ -180,6 +178,7 @@ class TLDetector(object):
 
         if closest_light:
             state = self.get_light_state(closest_light)
+            rospy.logwarn("  traffic_light:{0}.".format(state))
             return line_wp_idx, state
 
         return -1, TrafficLight.UNKNOWN
