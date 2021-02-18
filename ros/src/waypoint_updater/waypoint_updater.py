@@ -108,7 +108,7 @@ class WaypointUpdater(object):
         return lane
 
     def decelerate_waypoints(self, waypoints, closest_idx):
-        rospy.logwarn("waypoint_update: decelerating due to stop signal")
+        #rospy.logwarn("waypoint_update: decelerating due to stop signal")
         temp = []
         for i, wp in enumerate(waypoints):
 
