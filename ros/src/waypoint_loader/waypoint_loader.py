@@ -20,7 +20,8 @@ class WaypointLoader(object):
     def __init__(self):
         rospy.init_node('waypoint_loader', log_level=rospy.DEBUG)
 
-        self.pub = rospy.Publisher('/base_waypoints', Lane, queue_size=1, latch=True)
+        self.pub = rospy.Publisher(
+            '/base_waypoints', Lane, queue_size=1, latch=True)
 
         self.velocity = self.kmph2mps(rospy.get_param('~velocity'))
         self.new_waypoint_loader(rospy.get_param('~path'))
@@ -51,7 +52,12 @@ class WaypointLoader(object):
                 p.pose.pose.position.z = float(wp['z'])
                 q = self.quaternion_from_yaw(float(wp['yaw']))
                 p.pose.pose.orientation = Quaternion(*q)
-                p.twist.twist.linear.x = float(self.velocity)
+                if float(self.velocity) < 15.0:
+                    p.twist.twist.linear.x = float(self.velocity)
+                else:
+                    rospy.logwarn(
+                        "waypoint_loader: Velocity param is exceed than max value {:3f}".format(15.0))
+                    p.twist.twist.linear.x = 15.0
 
                 waypoints.append(p)
         return self.decelerate(waypoints)
@@ -64,7 +70,8 @@ class WaypointLoader(object):
         last = waypoints[-1]
         last.twist.twist.linear.x = 0.
         for wp in waypoints[:-1][::-1]:
-            dist = self.distance(wp.pose.pose.position, last.pose.pose.position)
+            dist = self.distance(wp.pose.pose.position,
+                                 last.pose.pose.position)
             vel = math.sqrt(2 * MAX_DECEL * dist)
             if vel < 1.:
                 vel = 0.

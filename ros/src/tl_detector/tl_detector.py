@@ -80,7 +80,7 @@ class TLDetector(object):
             msg (Image): image from car-mounted camera
 
         """
-        rospy.logwarn("tl_dectector: image_cb callback")
+        #rospy.logwarn("tl_dectector: image_cb callback")
 
         self.has_image = True
         self.camera_image = msg
@@ -132,8 +132,18 @@ class TLDetector(object):
             int: ID of traffic light color (specified in styx_msgs/TrafficLight)
 
         """
-        # For testing
-        return light.state
+        if(not self.has_image):
+            self.prev_light_loc = None
+            return TrafficLight.UNKNOWN
+
+        if (self.camera_image):
+            cv_image = self.bridge.imgmsg_to_cv2(self.camera_image, "bgr8")
+            #cv2.imwrite('test_cam.png', cv_image)
+            return self.light_classifier.get_classification(cv_image)
+
+        # For testings
+        # return light.state
+
         """ Below is for real (should be implemented 2/16)
         if(not self.has_image):
             self.prev_light_loc = None
@@ -178,7 +188,8 @@ class TLDetector(object):
 
         if closest_light:
             state = self.get_light_state(closest_light)
-            rospy.logwarn("  traffic_light:{0}.".format(state))
+            rospy.logwarn(
+                "tl_dectector: traffic_light is {000}.".format(state))
             return line_wp_idx, state
 
         return -1, TrafficLight.UNKNOWN
